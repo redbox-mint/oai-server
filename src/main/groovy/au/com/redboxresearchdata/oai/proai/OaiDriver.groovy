@@ -1,6 +1,20 @@
-/**
- * 
- */
+/*******************************************************************************
+*Copyright (C) 2014 Queensland Cyber Infrastructure Foundation (http://www.qcif.edu.au/)
+*
+*This program is free software: you can redistribute it and/or modify
+*it under the terms of the GNU General Public License as published by
+*the Free Software Foundation; either version 2 of the License, or
+*(at your option) any later version.
+*
+*This program is distributed in the hope that it will be useful,
+*but WITHOUT ANY WARRANTY; without even the implied warranty of
+*MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*GNU General Public License for more details.
+*
+*You should have received a copy of the GNU General Public License along
+*with this program; if not, write to the Free Software Foundation, Inc.,
+*51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+******************************************************************************/
 package au.com.redboxresearchdata.oai.proai
 
 import groovy.sql.Sql;
@@ -21,7 +35,12 @@ import proai.error.RepositoryException;
 import org.apache.log4j.Logger;
 
 /**
- * @author Shilo Banihit
+ * Proai repository-specific data driver. 
+ *
+ * <p>
+ * The driver retrieves data from DB tables 
+ * </p>
+ * @author <a href="https://github.com/shilob">Shilo Banihit</a>
  *
  */
 class OaiDriver implements OAIDriver {
@@ -32,12 +51,15 @@ class OaiDriver implements OAIDriver {
 	private static final String KEY_IDENTITY = "identity"
 	private static final String KEY_SETS = "sets"
 	private static final String KEY_RECORDS = "records"
+	private static final String KEY_CHANGE = "change"
 	 
 	def sql
 	def ddls
 	def ddl_check
 	def statements_select
 	def statements_init
+	def init_sql
+	def df_change
 	
 	
 
@@ -48,51 +70,71 @@ class OaiDriver implements OAIDriver {
 		sql.close()
 	}
 
-	/* (non-Javadoc)
-	 * @see proai.driver.OAIDriver#getLatestDate()
-	 */
-	public Date getLatestDate() throws RepositoryException {
-		return new Date()
+	/**
+	* Returns the date of the most recent DB-wide change. 
+	*/
+	public Date getLatestDate() throws RepositoryException {		
+		def sqlStatement = statements_select[KEY_CHANGE]
+		def row = sql.firstRow(sqlStatement)
+		Date date = new Date()
+		if (row.latestModDate) {
+			logger.debug("Got latestModDate: ${row.latestModDate}")
+			date = Date.parse(df_change, row.latestModDate)			
+		} else {
+			logger.error("SQL did not return a 'latestModDate' column, returning the current date.")
+		}
+		logger.debug("Returning date: ${date}")
+		return date				
 	}
 
-	/* (non-Javadoc)
-	 * @see proai.driver.OAIDriver#init(java.util.Properties)
-	 */
+	/**
+	* The main entry point from Proai. The method expects the DB init properties as well as the SQL statements.
+	*/
 	public void init(Properties prop) throws RepositoryException {
 		def connInfo= [url:prop.getProperty("${PROPERTY_PREFIX}.db.url"), user:prop.getProperty("${PROPERTY_PREFIX}.db.user"), password:prop.getProperty("${PROPERTY_PREFIX}.db.pw"), driver:prop.getProperty("${PROPERTY_PREFIX}.db.driver")]
 		logger.debug(connInfo)
 		sql = Sql.newInstance(connInfo)
 		
-		def tables = [KEY_METADATAFORMAT, KEY_IDENTITY, KEY_SETS, KEY_RECORDS]
+		def tables = [KEY_METADATAFORMAT, KEY_IDENTITY, KEY_SETS, KEY_RECORDS, KEY_CHANGE]
 		
 		ddls = [:]
 		ddl_check = [:]
 		statements_init = [:]
 		statements_select = [:]
+		init_sql = prop.getProperty("${PROPERTY_PREFIX}.db.sql.init")
+		df_change = prop.getProperty("${PROPERTY_PREFIX}.df.change")
 		// get the statements
 		tables.each {table-> 
 			ddls[table] = prop.getProperty("${PROPERTY_PREFIX}.db.ddl.${table}")
 			ddl_check[table] = prop.getProperty("${PROPERTY_PREFIX}.db.ddl.${table}.check")
 			statements_init[table] = prop.getProperty("${PROPERTY_PREFIX}.db.sql.${table}.init")
 			statements_select[table] = prop.getProperty("${PROPERTY_PREFIX}.db.sql.${table}.select")
-		}						
+		}
+		if (init_sql) {
+			logger.debug("Init sql provided, executing: ${init_sql}")
+			sql.execute(init_sql)
+		}
 		// determine if we need to ddl and seed
 		tables.each {table->
-			if (!tableExists(ddl_check[table])) {
-				logger.debug("DDL Executing: ${ddls[table]}")
-				sql.execute(ddls[table])
-				logger.debug("Verifying...")
+			if (ddl_check[table]) {
 				if (!tableExists(ddl_check[table])) {
-					logger.error("Failed to create table: ${ddls[table]}")
-					return					
-				}
-				if (statements_init[table]) {
-					// seeding data...
-					logger.debug("Seeding data...")
-					sql.execute(statements_init[table])
-				}
-			}			
-		}				
+					logger.debug("DDL Executing: ${ddls[table]}")
+					sql.execute(ddls[table])
+					logger.debug("Verifying...")
+					if (!tableExists(ddl_check[table])) {
+						logger.error("Failed to create table: ${ddls[table]}")
+						return					
+					}
+					if (statements_init[table]) {
+						// seeding data...
+						logger.debug("Seeding data...")
+						sql.execute(statements_init[table])
+					}
+				}			
+			} else {
+				logger.debug("No ddl check for table: ${table}, skipping.")
+			}
+		}					
 	}
 	
 	def tableExists(ddlCheck) {

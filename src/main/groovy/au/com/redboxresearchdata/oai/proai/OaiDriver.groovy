@@ -204,8 +204,12 @@ class OaiDriver implements OAIDriver {
 		def sqlStatement = statements_select[KEY_IDENTITY]
 		logger.debug("Executing: ${sqlStatement}")
 		def row = sql.firstRow(sqlStatement)
-		writer.println(row.xmlEntry)
-		logger.debug("Returned Identity: ${row.xmlEntry}")		
+		if (row) {
+			writer.println(row.xmlEntry)
+			logger.debug("Returned Identity: ${row.xmlEntry}")
+		} else {
+			logger.error("It seems that there is no identity record. Please insert a record.")
+		}		
 	}
 
 	/* (non-Javadoc)

@@ -4,7 +4,7 @@ This project contains a data driver and configuration for Proai, a repository-ne
 
 This allows institutions to focus on providing a OAI-PMH feed rather than maintaining a OAI-PMH server codebase.
 
-Proai requires a database with JDBC drivers. The data driver also requires a JDBC-available database. Currently, the server has been tested with Tomcat, using Postgres and Derby as backends.    
+Proai requires a database with JDBC drivers. The data driver also requires a JDBC-accessible database. Currently, the server has been tested with Tomcat, using Postgres and Derby as backends.    
 
 Installing
 ====
@@ -13,8 +13,8 @@ You can get the latest <a href="http://dev.redboxresearchdata.com.au/nexus/servi
 Prior to running the server, you will need to create the backend database and the user specified in the <a href="https://github.com/redbox-mint/oai-server/blob/master/src/main/java/proai.properties">proai.properties</a> file. By default, you will need to create the ff. on your localhost Postgres server:
 
 	DB: oaiserver
-	User: proai
-	Password: proai
+	User: oaiserver
+	Password: oaiserver
 
 Of course, you can modify the above values and secure your DB server as appropriate. :)
 

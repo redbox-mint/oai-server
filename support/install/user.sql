@@ -4,9 +4,7 @@ CREATE ROLE oaiserver LOGIN
 CREATE DATABASE oaiserver
   WITH OWNER = oaiserver
        ENCODING = 'UTF8'
-       TABLESPACE = pg_default
-       LC_COLLATE = 'English_Australia.1252'
-       LC_CTYPE = 'English_Australia.1252'
+       TABLESPACE = pg_default       
        CONNECTION LIMIT = -1;
 GRANT ALL ON DATABASE oaiserver TO oaiserver;
 REVOKE ALL ON DATABASE oaiserver FROM public;  

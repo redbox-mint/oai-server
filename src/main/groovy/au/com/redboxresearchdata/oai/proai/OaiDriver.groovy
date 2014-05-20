@@ -175,7 +175,7 @@ class OaiDriver implements OAIDriver {
 		logger.debug("Executing: ${sqlStatement}")
 		def rows = sql.rows(sqlStatement)
 		rows.each{row->
-			list << new RecordImpl(row.id.toString(), row.metadataPrefix, row.source)
+			list << new RecordImpl(row.recordId.toString(), row.metadataPrefix, row.source)
 			logger.debug("Return Record....metadataPrefix: '${row.metadataPrefix}', source:'${row.source}")
 		}
 		return new RemoteIteratorImpl<Record>(list.iterator())

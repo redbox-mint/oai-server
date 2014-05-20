@@ -217,9 +217,9 @@ class OaiDriver implements OAIDriver {
 	 */
 	public void writeRecordXML(String itemId, String mdPrefix, String sourceInfo, PrintWriter writer) throws RepositoryException {
 		logger.debug("Asking to return Record... itemId:'${itemId}', mdPrefix:'${mdPrefix}', sourceInfo:'${sourceInfo}'")
-		def sqlStatement = "${statements_select[KEY_RECORDS]} WHERE recordId=?"
+		def sqlStatement = "${statements_select[KEY_RECORDS]} WHERE recordId=? AND metadataPrefix=? AND source=?"
 		logger.debug("Executing: ${sqlStatement}")
-		def row = sql.firstRow(sqlStatement, itemId)
+		def row = sql.firstRow(sqlStatement, [itemId, mdPrefix, sourceInfo])
 		logger.debug("xmlEntry: ${row.xmlEntry}")		  			
 		writer.println(row.xmlEntry)
 	}

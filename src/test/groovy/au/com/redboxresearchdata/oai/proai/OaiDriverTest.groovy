@@ -52,7 +52,7 @@ class OaiDriverTest extends GroovyTestCase {
 		
 		StringWriter writer = new StringWriter()
 		PrintWriter pwriter = new PrintWriter(writer)		
-		driver.writeRecordXML("1", "eac-cpf", "init-seed", pwriter)
+		driver.writeRecordXML("recordId", "eac-cpf", "init-seed", pwriter)
 		pwriter.flush()		
 		String content = writer.toString()
 		logger.debug("Record: ${content}")

@@ -38,3 +38,4 @@ INSERT INTO provider_identity (xmlEntry) VALUES ('<Identify>    <repositoryName>
 INSERT INTO provider_sets (spec, xmlEntry) VALUES ('Parties_People', '<set><setSpec>Parties_People</setSpec><setName>Parties - People</setName></set>');
 INSERT INTO provider_metadataformat (metadataPrefix, schemaTxt, metadataNamespace) VALUES ('eac-cpf', 'urn:isbn:1-931666-33-4 http://eac.staatsbibliothek-berlin.de/schema/cpf.xsd', 'urn:isbn:1-931666-33-4');
 INSERT INTO provider_metadataformat (metadataPrefix, schemaTxt, metadataNamespace) VALUES ('oai_dc', 'http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd', 'http://purl.org/dc/elements/1.1/');
+INSERT INTO provider_metadataformat (metadataPrefix, schemaTxt, metadataNamespace) VALUES ('rif', 'http://ands.org.au/standards/rif-cs/registryObjects http://services.ands.org.au/home/orca/schemata/registryObjects.xsd', 'http://ands.org.au/standards/rif-cs/registryObjects');

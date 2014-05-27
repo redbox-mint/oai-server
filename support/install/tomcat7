@@ -13,50 +13,50 @@ RETVAL=$?
 CATALINA_HOME="/opt/tomcat7"
 CATALINA_PID=/var/run/tomcat/tomcat7.pid
 
-running() {
-        [ -f $CATALINA_PID ] || return 1
-        PID=$(cat $CATALINA_PID)
-        ps -p $PID > /dev/null 2> /dev/null || return 1
-        return 0
+NAME=`basename $0`
+
+start() {
+	if [ -f $CATALINA_HOME/bin/startup.sh ]; then
+    	echo $"Starting Tomcat"
+    	if [ ! -e /var/run/tomcat ]; then
+    		mkdir -p /var/run/tomcat
+    		chown tomcat /var/run/tomcat
+    	fi
+        /bin/su tomcat $CATALINA_HOME/bin/startup.sh
+        if [ $? -eq 0 ]; then
+        	success "Tomcat started."
+        else
+        	failure "Tomcat failed to start"
+        	RETVAL=$?
+        fi
+    fi
+}
+
+stop() {
+	if [ -f $CATALINA_PID ]; then
+		echo $"Stopping Tomcat"
+	    kill `cat $CATALINA_PID`
+	    rm -rf $CATALINA_PID
+	    success "Tomcat stopped."
+	fi
 }
 
 case "$1" in
  	start)
-        if [ -f $CATALINA_HOME/bin/startup.sh ];
-          then
-	    echo $"Starting Tomcat"
-	    	if [ ! -e /var/run/tomcat ]; then
-	    		mkdir /var/run/tomcat
-	    		chown tomcat /var/run/tomcat
-	    	fi
-            /bin/su tomcat $CATALINA_HOME/bin/startup.sh
-        fi
+       start
 	;;
  	stop)
-        if [ -f $CATALINA_HOME/bin/catalina.sh ];
-          then
-	    	echo $"Stopping Tomcat"
-            kill `cat $CATALINA_PID`
-            rm -rf $CATALINA_PID
-        fi
+       stop
  	;;
  	restart)
-        echo "Restarting Tomcat"
-        if running; then
-                service tomcat7 stop
-                sleep 10
-        fi
-        service tomcat7 start
+        stop
+        sleep 10
+        start
         ;;
 	status)
-	        echo -n " * Tomcat is "
-	        if running; then
-	                echo "started"
-	                echo "   - PID: `cat $CATALINA_PID`"
-	        else
-	                echo "stopped"
-	        fi
-	        ;;
+	    status -p $CATALINA_PID $NAME
+	    RETVAL=$?   
+	    ;;
 	 *)
         echo $"Usage: $0 {start|stop|restart|status}"
 		exit 1

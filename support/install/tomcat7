@@ -12,8 +12,16 @@
 RETVAL=$?
 CATALINA_HOME="/opt/tomcat7"
 CATALINA_PID=/var/run/tomcat/tomcat7.pid
+
+running() {
+        [ -f $CATALINA_PID ] || return 1
+        PID=$(cat $CATALINA_PID)
+        ps -p $PID > /dev/null 2> /dev/null || return 1
+        return 0
+}
+
 case "$1" in
- start)
+ 	start)
         if [ -f $CATALINA_HOME/bin/startup.sh ];
           then
 	    echo $"Starting Tomcat"
@@ -24,7 +32,7 @@ case "$1" in
             /bin/su tomcat $CATALINA_HOME/bin/startup.sh
         fi
 	;;
- stop)
+ 	stop)
         if [ -f $CATALINA_HOME/bin/catalina.sh ];
           then
 	    	echo $"Stopping Tomcat"
@@ -32,10 +40,27 @@ case "$1" in
             rm -rf $CATALINA_PID
         fi
  	;;
- *)
- 	echo $"Usage: $0 {start|stop}"
-	exit 1
-	;;
+ 	restart)
+        echo "Restarting Tomcat"
+        if running; then
+                service tomcat7 stop
+                sleep 10
+        fi
+        service tomcat7 start
+        ;;
+	status)
+	        echo -n " * Tomcat is "
+	        if running; then
+	                echo "started"
+	                echo "   - PID: `cat $CATALINA_PID`"
+	        else
+	                echo "stopped"
+	        fi
+	        ;;
+	 *)
+        echo $"Usage: $0 {start|stop|restart|status}"
+		exit 1
+		;;
 esac
 
 exit $RETVAL

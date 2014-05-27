@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# tomcat        
+# tomcat Control script for tomcat 7       
 #
-# chkconfig: 
+# chkconfig: 2345 20 80
 # description: 	Start up the Tomcat servlet engine.
 
 # Source function library.

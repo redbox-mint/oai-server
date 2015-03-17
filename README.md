@@ -4,7 +4,7 @@ This project contains a data driver and configuration for Proai, a repository-ne
 
 This allows institutions to focus on providing a OAI-PMH feed rather than maintaining a OAI-PMH server codebase.
 
-Proai requires a database with JDBC drivers. The data driver also requires a JDBC-accessible database. Currently, the server has been tested with Tomcat, using Postgres and Derby as backends.    
+Proai requires a database with JDBC drivers and a JDBC-accessible database. Currently, the server has been tested with Tomcat, using MySQL, Postgres and Derby as backends.    
 
 Installing
 ====
